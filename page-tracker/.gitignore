@@ -1,2 +1,3 @@
 venv/
 src/page_tracker.egg-info
+src/page_tracker/__pycache__
