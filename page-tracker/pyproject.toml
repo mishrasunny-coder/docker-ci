@@ -13,5 +13,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
-    "pytest-timeout"
+    "pytest-timeout",
+    "requests",
 ]

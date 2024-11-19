@@ -1,4 +1,8 @@
 venv/
 src/page_tracker.egg-info
 src/page_tracker/__pycache__
-tests/unit/__pycache__
+tests/unit/__pycache__/
+tests/integration/__pycache__/
+__pycache__/
+**/__pycache__/
+
