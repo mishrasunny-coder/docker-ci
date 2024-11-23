@@ -1,10 +1,11 @@
+import os
+from functools import cache
+
 from flask import Flask
 from redis import Redis, RedisError
-from functools import cache
-import os
-
 
 app = Flask(__name__)
+
 
 @app.get("/")
 def index():
@@ -15,6 +16,7 @@ def index():
         return "Sorry, something went wrong \N{pensive face}", 500
     else:
         return f"This page has been viewed {page_views} times"
+
 
 @cache
 def redis():
