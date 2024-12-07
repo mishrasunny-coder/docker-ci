@@ -20,7 +20,7 @@ jobs:
       - name: Run end-to-end tests
         working-directory:  .
         run: >
-          docker compose -f docker-compose.yml 
+          docker compose -f page-tracker/docker-compose.yml 
           --profile testing up
           --build
           --exit-code-from test-service
