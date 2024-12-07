@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Run end-to-end tests
         run: >
-          docker compose --profile testing up
+          docker compose -f docker-compose.yml --profile testing up
           --build
           --exit-code-from test-service
       - name: Login to Docker Hub
