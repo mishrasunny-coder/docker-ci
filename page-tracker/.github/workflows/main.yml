@@ -1,5 +1,4 @@
 name: Continuous Integration
-# test3
 
 on:
   pull_request:
