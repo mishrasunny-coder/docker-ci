@@ -1,13 +1,14 @@
 name: Continuous Integration
 
 on:
-  pull_request:
-    branches:
-      - main
-  
   push:
     branches:
       - main
+
+  pull_request:
+    branches:
+      - main
+
 
 jobs:
   build:
@@ -30,12 +31,12 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Push Image to DockerHub
         uses: docker/build-push-action@v4.0.0
+        if: ${{ github.event_name == 'push' }}
         with:
           context: page-tracker/web
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/page-tracker:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/page-tracker:latest
-          build-args: --progress=plain
 
 
