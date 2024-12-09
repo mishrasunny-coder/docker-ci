@@ -37,5 +37,6 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/page-tracker:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/page-tracker:latest
+          build-args: --progress=plain
 
 
