@@ -32,7 +32,7 @@ jobs:
       - name: Push Image to DockerHub
         uses: docker/build-push-action@v4.0.0
         with:
-          context: page-tracker/web
+          context: ./web
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/page-tracker:${{ github.sha }}
