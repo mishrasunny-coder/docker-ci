@@ -1,5 +1,3 @@
-# docker-compose.yml
-
 services:
   redis-service:
     image: "redis:7.0.10-bullseye"
