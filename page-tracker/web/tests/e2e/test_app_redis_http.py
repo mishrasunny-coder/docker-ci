@@ -2,6 +2,7 @@ import pytest
 import redis
 import requests
 
+
 @pytest.mark.timeout(1.5)
 def test_should_update_redis(redis_client, flask_url):
     # Given
