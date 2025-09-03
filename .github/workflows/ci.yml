@@ -9,34 +9,180 @@ on:
     branches:
       - main
 
+env:
+  PYTHON_VERSION: "3.11"
 
 jobs:
-  build:
-    name: Build Docker Images and run end to end tests
-    runs-on:  ubuntu-latest
+  # Static Code Analysis Job
+  static-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code from github
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd page-tracker/web
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run flake8 linting
+        run: |
+          cd page-tracker/web
+          python -m flake8 src/ --count --show-source --statistics
+
+      - name: Run black code formatting check
+        run: |
+          cd page-tracker/web
+          python -m black src/ tests/ --check --diff
+
+      - name: Run isort import sorting check
+        run: |
+          cd page-tracker/web
+          python -m isort src/ tests/ --check-only --diff
+
+      - name: Run pylint analysis
+        run: |
+          cd page-tracker/web
+          python -m pylint src/ --disable=C0114,C0116,R1705 --fail-under=8.0
+
+      - name: Run bandit security analysis
+        run: |
+          cd page-tracker/web
+          python -m bandit -r src/ -f json -o bandit-report.json || true
+          python -m bandit -r src/ --severity-level medium
+
+  # Unit Tests Job
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd page-tracker/web
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run unit tests
+        run: |
+          cd page-tracker/web
+          python -m pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=html
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: page-tracker/web/coverage.xml
+          flags: unit
+          name: unit-tests-coverage
+
+  # Integration Tests Job
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7.0.10-bullseye
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd page-tracker/web
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run integration tests
+        run: |
+          cd page-tracker/web
+          python -m pytest tests/integration/ -v --redis-url=redis://localhost:6379
+
+  # End-to-End Tests Job
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Run end-to-end tests
-        run: >
-          docker compose -f page-tracker/docker-compose.yml 
-          --profile testing up
-          --build
-          --exit-code-from test-service
+        run: |
+          cd page-tracker
+          docker compose --profile testing up --build --exit-code-from test-service
+
+      - name: Clean up
+        if: always()
+        run: |
+          cd page-tracker
+          docker compose down -v
+
+  # Build and Deploy Job (only on main branch)
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    needs: [static-analysis, unit-tests, integration-tests, e2e-tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        if: ${{github.event_name == 'push' }}
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Push Image to DockerHub
-        uses: docker/build-push-action@v4.0.0
-        if: ${{ github.event_name == 'push' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
         with:
           context: page-tracker/web
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/page-tracker:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/page-tracker:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # PR Status Check
+  pr-status:
+    name: PR Status Check
+    runs-on: ubuntu-latest
+    needs: [static-analysis, unit-tests, integration-tests, e2e-tests]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check all jobs status
+        run: |
+          echo "✅ All CI checks passed!"
+          echo "Static Analysis: ${{ needs.static-analysis.result }}"
+          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          echo "Integration Tests: ${{ needs.integration-tests.result }}"
+          echo "E2E Tests: ${{ needs.e2e-tests.result }}"
 
 

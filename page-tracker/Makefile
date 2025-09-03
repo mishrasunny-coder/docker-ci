@@ -1,7 +1,7 @@
 # Page Tracker Application Makefile
 # This Makefile provides convenient commands for development and testing
 
-.PHONY: help up down build test-unit test-integration test-e2e test-all lint black isort pylint bandit format check clean logs
+.PHONY: help up down build test-unit test-integration test-e2e test-all coverage lint black isort pylint bandit format check clean logs
 
 # Default target
 help: ## Show this help message
@@ -31,7 +31,7 @@ logs: ## Show service logs
 # Testing Commands
 test-unit: ## Run unit tests
 	@echo "🧪 Running unit tests..."
-	cd web && source venv/bin/activate && python -m pytest tests/unit/ -v
+	cd web && source venv/bin/activate && python -m pytest tests/unit/ -v --cov=src --cov-report=html --cov-report=term
 
 test-integration: ## Run integration tests
 	@echo "🔗 Running integration tests..."
@@ -46,6 +46,11 @@ test-all: ## Run all tests (unit + integration + e2e)
 	$(MAKE) test-unit
 	$(MAKE) test-integration
 	$(MAKE) test-e2e
+
+coverage: ## Generate and view test coverage report
+	@echo "📊 Generating coverage report..."
+	cd web && source venv/bin/activate && python -m pytest tests/unit/ --cov=src --cov-report=html --cov-report=term
+	@echo "📈 Coverage report generated in web/htmlcov/index.html"
 
 # Code Quality Commands
 lint: ## Run flake8 linting

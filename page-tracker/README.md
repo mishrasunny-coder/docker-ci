@@ -159,22 +159,74 @@ make check   # Run all quality checks
 ## 🚀 CI/CD Pipeline
 
 ### GitHub Actions Workflow
-The CI/CD pipeline automatically:
+The CI/CD pipeline automatically runs on every push and pull request:
 
-1. **On Pull Request:**
-   - Runs end-to-end tests
-   - Executes all code quality checks
-   - Builds Docker images
+#### **On Pull Request:**
+1. **Static Code Analysis** - Comprehensive code quality checks:
+   - `flake8` - Linting and style checking
+   - `black` - Code formatting validation
+   - `isort` - Import sorting validation
+   - `pylint` - Code analysis (minimum score: 8.0/10)
+   - `bandit` - Security vulnerability scanning
 
-2. **On Merge to Main:**
-   - Builds production Docker image
-   - Pushes to Docker Hub with tags:
-     - `username/page-tracker:latest`
-     - `username/page-tracker:commit-sha`
+2. **Unit Tests** - Individual component testing:
+   - Runs all unit tests with coverage reporting
+   - Generates coverage reports (HTML + XML)
+   - Uploads coverage to Codecov
+
+3. **Integration Tests** - Component interaction testing:
+   - Tests Flask app with real Redis service
+   - Uses GitHub Actions Redis service
+   - Validates Redis connectivity and operations
+
+4. **End-to-End Tests** - Full system testing:
+   - Complete Docker Compose environment
+   - Tests entire application stack
+   - Validates HTTP endpoints and Redis integration
+
+#### **On Merge to Main:**
+- **Build and Deploy** - Production deployment:
+  - Builds optimized Docker image
+  - Pushes to Docker Hub with tags:
+    - `username/page-tracker:latest`
+    - `username/page-tracker:commit-sha`
+  - Uses GitHub Actions cache for faster builds
+
+### Branch Protection Rules
+The `main` branch is protected with the following rules:
+- ✅ All CI checks must pass before merge
+- ✅ At least 1 code review required
+- ✅ Branches must be up to date
+- ✅ Conversation resolution required
+- ✅ Linear history enforced
 
 ### Local CI Testing
 ```bash
 make ci-test  # Run the same tests as CI
+make check    # Run all static analysis checks
+make test-all # Run all test types
+make coverage # Generate coverage reports
+```
+
+### CI Job Dependencies
+```mermaid
+graph TD
+    A[Pull Request] --> B[Static Analysis]
+    A --> C[Unit Tests]
+    A --> D[Integration Tests]
+    A --> E[End-to-End Tests]
+    
+    B --> F[PR Status Check]
+    C --> F
+    D --> F
+    E --> F
+    
+    F --> G{All Pass?}
+    G -->|Yes| H[Ready for Merge]
+    G -->|No| I[Blocked from Merge]
+    
+    H --> J[Build & Deploy]
+    J --> K[Docker Hub Push]
 ```
 
 ## 📁 Project Structure
