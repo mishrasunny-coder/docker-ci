@@ -12,5 +12,5 @@ def test_should_update_redis(redis_client, flask_url):
 
     # Then
     assert response.status_code == 200
-    assert response.text == "This page has been viewed 5 times"
+    assert response.text == "🎉 This page has been viewed 5 times! Thanks for visiting!"
     assert redis_client.get("page_views") == b"5"
