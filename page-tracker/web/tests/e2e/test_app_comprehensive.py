@@ -60,6 +60,9 @@ def test_e2e_http_headers(redis_client, flask_url):
     assert "Thanks for visiting!" in response.text
 
 
+# tests/e2e/test_app_comprehensive.py
+
+
 @pytest.mark.timeout(10.0)
 def test_e2e_http_methods(redis_client, flask_url):
     """Test different HTTP methods"""
@@ -73,12 +76,11 @@ def test_e2e_http_methods(redis_client, flask_url):
     assert get_response.status_code == 200
     assert "This page has been viewed 1 times!" in get_response.text
 
-    # When - Test POST method (should also work, Flask allows it by default)
+    # When - Test POST method (should be disallowed)
     post_response = requests.post(flask_url)
 
-    # Then
-    assert post_response.status_code == 200
-    assert "This page has been viewed 2 times!" in post_response.text
+    # Then - Assert that the method is not allowed
+    assert post_response.status_code == 405
 
 
 @pytest.mark.timeout(10.0)
