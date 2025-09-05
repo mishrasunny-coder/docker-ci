@@ -10,4 +10,5 @@ isort
 pylint
 pytest
 pytest-timeout
+pytest-cov
 requests

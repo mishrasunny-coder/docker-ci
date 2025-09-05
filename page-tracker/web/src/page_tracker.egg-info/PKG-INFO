@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: page-tracker
 Version: 1.0.0
 Requires-Dist: Flask
@@ -12,4 +12,5 @@ Requires-Dist: isort; extra == "dev"
 Requires-Dist: pylint; extra == "dev"
 Requires-Dist: pytest; extra == "dev"
 Requires-Dist: pytest-timeout; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
 Requires-Dist: requests; extra == "dev"

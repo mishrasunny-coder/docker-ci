@@ -1,7 +1,8 @@
 import unittest.mock
 
 import pytest
-from redis import ConnectionError, TimeoutError, ResponseError, BusyLoadingError
+from redis import (BusyLoadingError, ConnectionError, ResponseError,
+                   TimeoutError)
 
 from page_tracker.app import app
 
@@ -98,7 +99,10 @@ def test_should_handle_large_page_view_count(mock_redis, http_client):
 
     # Then
     assert response.status_code == 200
-    assert response.text == "🎉 This page has been viewed 999999999 times! Thanks for visiting!"
+    assert (
+        response.text
+        == "🎉 This page has been viewed 999999999 times! Thanks for visiting!"
+    )
 
 
 @unittest.mock.patch("page_tracker.app.redis")
@@ -124,7 +128,9 @@ def test_should_handle_negative_page_view_count(mock_redis, http_client):
 
     # Then
     assert response.status_code == 200
-    assert response.text == "🎉 This page has been viewed -1 times! Thanks for visiting!"
+    assert (
+        response.text == "🎉 This page has been viewed -1 times! Thanks for visiting!"
+    )
 
 
 @unittest.mock.patch("page_tracker.app.redis")
@@ -183,7 +189,9 @@ def test_should_handle_redis_incr_returning_none(mock_redis, http_client):
 
     # Then
     assert response.status_code == 200
-    assert response.text == "🎉 This page has been viewed None times! Thanks for visiting!"
+    assert (
+        response.text == "🎉 This page has been viewed None times! Thanks for visiting!"
+    )
 
 
 @unittest.mock.patch("page_tracker.app.redis")
@@ -196,4 +204,6 @@ def test_should_handle_redis_incr_returning_string(mock_redis, http_client):
 
     # Then
     assert response.status_code == 200
-    assert response.text == "🎉 This page has been viewed 123 times! Thanks for visiting!"
+    assert (
+        response.text == "🎉 This page has been viewed 123 times! Thanks for visiting!"
+    )

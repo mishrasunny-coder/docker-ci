@@ -1,7 +1,8 @@
 import os
 import unittest.mock
+
 import pytest
-from redis import Redis, ConnectionError, TimeoutError, ResponseError
+from redis import ConnectionError, Redis, ResponseError, TimeoutError
 
 
 def test_redis_connection_with_default_url():
@@ -9,13 +10,14 @@ def test_redis_connection_with_default_url():
     with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
         # Given
         mock_redis.return_value = unittest.mock.MagicMock()
-        
+
         # When
         from page_tracker.app import redis
+
         # Clear the cache to ensure fresh call
         redis.cache_clear()
         redis_client = redis()
-        
+
         # Then
         mock_redis.assert_called_once_with("redis://localhost:6379")
         assert redis_client is not None
@@ -27,13 +29,14 @@ def test_redis_connection_with_custom_url():
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.return_value = unittest.mock.MagicMock()
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
             redis_client = redis()
-            
+
             # Then
             mock_redis.assert_called_once_with("redis://custom:6379")
             assert redis_client is not None
@@ -44,15 +47,16 @@ def test_redis_connection_caching():
     with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
         # Given
         mock_redis.return_value = unittest.mock.MagicMock()
-        
+
         # When - Call redis() multiple times
         from page_tracker.app import redis
+
         # Clear the cache to ensure fresh call
         redis.cache_clear()
         client1 = redis()
         client2 = redis()
         client3 = redis()
-        
+
         # Then - Should only create one connection
         assert client1 is client2 is client3
         mock_redis.assert_called_once()
@@ -64,12 +68,13 @@ def test_redis_connection_with_invalid_url():
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.side_effect = ValueError("Invalid URL")
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
-            
+
             # Then - Should raise the error
             with pytest.raises(ValueError):
                 redis()
@@ -81,13 +86,14 @@ def test_redis_connection_with_empty_url():
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.return_value = unittest.mock.MagicMock()
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
             redis_client = redis()
-            
+
             # Then
             mock_redis.assert_called_once_with("")
             assert redis_client is not None
@@ -99,13 +105,14 @@ def test_redis_connection_with_none_url():
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.return_value = unittest.mock.MagicMock()
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
             redis_client = redis()
-            
+
             # Then
             mock_redis.assert_called_once_with("None")
             assert redis_client is not None
@@ -118,13 +125,14 @@ def test_redis_connection_with_special_characters():
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.return_value = unittest.mock.MagicMock()
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
             redis_client = redis()
-            
+
             # Then
             mock_redis.assert_called_once_with(special_url)
             assert redis_client is not None
@@ -137,13 +145,14 @@ def test_redis_connection_with_unicode_url():
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.return_value = unittest.mock.MagicMock()
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
             redis_client = redis()
-            
+
             # Then
             mock_redis.assert_called_once_with(unicode_url)
             assert redis_client is not None
@@ -156,13 +165,14 @@ def test_redis_connection_with_very_long_url():
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.return_value = unittest.mock.MagicMock()
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
             redis_client = redis()
-            
+
             # Then
             mock_redis.assert_called_once_with(long_url)
             assert redis_client is not None
@@ -173,12 +183,13 @@ def test_redis_connection_with_connection_error():
     with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
         # Given
         mock_redis.side_effect = ConnectionError("Connection failed")
-        
+
         # When
         from page_tracker.app import redis
+
         # Clear the cache to ensure fresh call
         redis.cache_clear()
-        
+
         # Then - Should raise the error
         with pytest.raises(ConnectionError):
             redis()
@@ -189,12 +200,13 @@ def test_redis_connection_with_timeout_error():
     with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
         # Given
         mock_redis.side_effect = TimeoutError("Connection timeout")
-        
+
         # When
         from page_tracker.app import redis
+
         # Clear the cache to ensure fresh call
         redis.cache_clear()
-        
+
         # Then - Should raise the error
         with pytest.raises(TimeoutError):
             redis()
@@ -205,12 +217,13 @@ def test_redis_connection_with_response_error():
     with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
         # Given
         mock_redis.side_effect = ResponseError("Invalid response")
-        
+
         # When
         from page_tracker.app import redis
+
         # Clear the cache to ensure fresh call
         redis.cache_clear()
-        
+
         # Then - Should raise the error
         with pytest.raises(ResponseError):
             redis()
@@ -221,12 +234,13 @@ def test_redis_connection_with_generic_exception():
     with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
         # Given
         mock_redis.side_effect = Exception("Unexpected error")
-        
+
         # When
         from page_tracker.app import redis
+
         # Clear the cache to ensure fresh call
         redis.cache_clear()
-        
+
         # Then - Should raise the error
         with pytest.raises(Exception):
             redis()
@@ -238,13 +252,14 @@ def test_redis_connection_with_none_environment():
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.return_value = unittest.mock.MagicMock()
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
             redis_client = redis()
-            
+
             # Then - Should use default URL
             mock_redis.assert_called_once_with("redis://localhost:6379")
             assert redis_client is not None
@@ -252,22 +267,26 @@ def test_redis_connection_with_none_environment():
 
 def test_redis_connection_with_multiple_environment_variables():
     """Test Redis connection with multiple environment variables"""
-    with unittest.mock.patch.dict(os.environ, {
-        "REDIS_URL": "redis://primary:6379",
-        "REDIS_URL_BACKUP": "redis://backup:6379",
-        "REDIS_HOST": "localhost",
-        "REDIS_PORT": "6379"
-    }):
+    with unittest.mock.patch.dict(
+        os.environ,
+        {
+            "REDIS_URL": "redis://primary:6379",
+            "REDIS_URL_BACKUP": "redis://backup:6379",
+            "REDIS_HOST": "localhost",
+            "REDIS_PORT": "6379",
+        },
+    ):
         with unittest.mock.patch("redis.Redis.from_url") as mock_redis:
             # Given
             mock_redis.return_value = unittest.mock.MagicMock()
-            
+
             # When
             from page_tracker.app import redis
+
             # Clear the cache to ensure fresh call
             redis.cache_clear()
             redis_client = redis()
-            
+
             # Then - Should use REDIS_URL
             mock_redis.assert_called_once_with("redis://primary:6379")
             assert redis_client is not None
