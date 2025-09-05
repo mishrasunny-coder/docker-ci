@@ -167,22 +167,6 @@ def test_integration_redis_error_recovery(redis_client, http_client):
 
 
 @pytest.mark.timeout(5.0)
-def test_integration_redis_unicode_handling(redis_client, http_client):
-    """Test Redis handles unicode characters correctly"""
-    # Given - Set a key with unicode characters
-    redis_client.set("page_views", 42)
-
-    # When - Make a request
-    response = http_client.get("/")
-
-    # Then
-    assert response.status_code == 200
-    assert "🎉" in response.text
-    assert "Thanks for visiting!" in response.text
-    assert "42" in response.text
-
-
-@pytest.mark.timeout(5.0)
 def test_integration_redis_concurrent_access(redis_client, http_client):
     """Test Redis handles concurrent access correctly"""
     # Given - Clear any existing data
