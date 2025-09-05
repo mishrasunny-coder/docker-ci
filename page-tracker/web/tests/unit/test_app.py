@@ -1,7 +1,8 @@
 import unittest.mock
 
 import pytest
-from redis import BusyLoadingError, ConnectionError, ResponseError, TimeoutError
+from redis import (BusyLoadingError, ConnectionError, ResponseError,
+                   TimeoutError)
 
 from page_tracker.app import app
 
